@@ -1,28 +1,47 @@
 package com.screensaver.fakeupdate.kamal;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
+import android.widget.ImageView;
+
 import java.io.InputStream;
 import java.util.Vector;
 
-public class ScreenSaver extends AppCompatActivity {
+import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
+import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
+
+public class ScreenSaverActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_screen_saver);
-        View decorView = getWindow().getDecorView();
-// Hide both the navigation bar and the status bar.
-// SYSTEM_UI_FLAG_FULLSCREEN is only available on Android 4.1 and higher, but as
-// a general rule, you should design your app to hide the status bar whenever you
-// hide the navigation bar.
-        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_FULLSCREEN;
-        decorView.setSystemUiVisibility(uiOptions);
+
+        // Make activity appear on top of keyguard
+        getWindow().addFlags(
+                FLAG_SHOW_WHEN_LOCKED | // Show activity over lock screen
+                FLAG_FULLSCREEN // Flag as fullscreen
+        );
+
+        // Stop ScreenSaverStarter service
+        Intent serviceIntent = new Intent(this, ScreenSaverStarter.class);
+        stopService(serviceIntent);
+
+        // Set content view
+        ImageView imageView = new ImageView(this);
+        imageView.setImageDrawable(getDrawable(R.drawable.screen_saver));
+        setContentView(imageView);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Start ScreenSaverStarter service
+        Intent serviceIntent = new Intent(this, ScreenSaverStarter.class);
+        startService(serviceIntent);
+    }
 
     InputStream stream = null;
 
